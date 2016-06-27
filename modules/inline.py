@@ -50,7 +50,7 @@ def create_event_message(event, user):
     )
 
     if 'description' in event:
-        message_text += Emoji.PAGE_WITH_CURL + ' _' + event['description'] + '_\n'
+        message_text += '_' + event['description'] + '_\n'
 
     if 'place' in event:
         message_text += Emoji.ROUND_PUSHPIN + ' ' + event['place'] + '\n'
