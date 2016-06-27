@@ -19,7 +19,7 @@ def create_event_payload(event):
 def create_keyboard(event, user):
     buttons = [
         InlineKeyboardButton(
-            text="Add to calendar",
+            text="Calendar",
             url='https://lukaville.github.com/create-event-bot/static/add.html#' + create_event_payload(event)
         ),
         InlineKeyboardButton(
