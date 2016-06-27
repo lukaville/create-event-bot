@@ -1,4 +1,7 @@
+import base64
 import datetime
+import json
+from urllib import parse
 
 from telegram import InlineQueryResultArticle, ParseMode, \
     InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup, Emoji
@@ -8,30 +11,27 @@ from store import TinyDBStore
 
 
 def create_event_payload(event):
-    return 'abc'
+    event_string = json.dumps(event)
+    eight_bit_string = base64.b64encode(event_string.encode('ascii'))
+    return parse.quote(eight_bit_string.decode('ascii'))
 
 
 def create_keyboard(event, user):
-    buttons = [InlineKeyboardButton(
-        text="Add to calendar",
-        url='https://lukaville.github.com/create-event-bot/web/add.html#'+create_event_payload(event),
-    )]
+    buttons = [
+        InlineKeyboardButton(
+            text="Add to calendar",
+            url='https://lukaville.github.com/create-event-bot/web/add.html#' + create_event_payload(event)
+        ),
+        InlineKeyboardButton(
+            text="Join",
+            callback_data='go_' + str(event.eid)
+        )
+    ]
 
     if event.get('place'):
         buttons.append(InlineKeyboardButton(
             text="Map",
-            url='https://maps.google.com/?q=' + event.get('place'),
-        ))
-
-    if 'users' in event and any(u['username'] == user['username'] for u in event['users']):
-        buttons.append(InlineKeyboardButton(
-            text="Exit",
-            callback_data='ngo_' + str(event.eid)
-        ))
-    else:
-        buttons.append(InlineKeyboardButton(
-            text="Join",
-            callback_data='go_' + str(event.eid)
+            url='https://maps.google.com/?q=' + parse.quote(event.get('place'))
         ))
 
     return [buttons, []]
@@ -80,31 +80,21 @@ class InlineModule(object):
         event = self.store.get_event(event_id)
 
         if command == 'go':
-            event = self.add_user(event, user)
-
-        if command == 'ngo':
-            event = self.remove_user(event, user)
+            event = self.toggle_user(event, user)
 
         bot.editMessageText(text=create_event_message(event, user),
                             inline_message_id=query.inline_message_id,
                             reply_markup=InlineKeyboardMarkup(inline_keyboard=create_keyboard(event, user)),
                             parse_mode=ParseMode.MARKDOWN)
 
-    def add_user(self, event, user):
+    def toggle_user(self, event, user):
         if not event.get('users'):
             event['users'] = []
 
-        if not any(u['username'] == user['username'] for u in event['users']):
+        if any(u['username'] == user['username'] for u in event['users']):
+            event['users'].remove(user)
+        else:
             event['users'].append(user)
-
-        self.store.update_event(event)
-        return event
-
-    def remove_user(self, event, user):
-        if not event.get('users'):
-            return event
-
-        event['users'].remove(user)
 
         self.store.update_event(event)
         return event
