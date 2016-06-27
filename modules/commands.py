@@ -1,3 +1,7 @@
+import time
+from datetime import datetime
+
+from parsedatetime import parsedatetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, MessageHandler, Filters
 
@@ -15,13 +19,7 @@ FIELDS = [
     },
     {
         'name': 'date',
-        'message': 'Please send me the date of event (e.g.: 10/25/16 12:20)'
-    },
-    {
-        'name': 'place',
-        'message': 'Please send me event duration in minutes (default — 60 minutes, /skip to set default value)',
-        'required': False,
-        'default': 60
+        'message': 'Please send me the date of event (e.g.: 10/25/16 12:20)',
     },
     {
         'name': 'place',
@@ -29,6 +27,15 @@ FIELDS = [
         'required': False
     },
 ]
+
+
+def parse_fields(field, value):
+    if field == 'date':
+        cal = parsedatetime.Calendar()
+        time_struct, parse_status = cal.parse(value)
+        timestamp = time.mktime(datetime(*time_struct[:6]).timetuple())
+        return str(int(timestamp))
+    return value
 
 
 def help_command(bot, update):
@@ -39,6 +46,7 @@ class CommandsModule(object):
     def __init__(self):
         self.handlers = [
             CommandHandler('start', self.start_command, pass_args=True),
+            CommandHandler('skip', self.skip_command),
             CommandHandler('help', help_command),
             MessageHandler([Filters.text], self.message)
         ]
@@ -64,19 +72,38 @@ class CommandsModule(object):
             current_field = draft['current_field']
             field = FIELDS[current_field]
 
-            event[field['name']] = text
+            event[field['name']] = parse_fields(field['name'], text)
             current_field += 1
 
-            self.store.update_draft(user_id, event, current_field)
+            self.update_draft(bot, event, user_id, update, current_field)
 
-            if current_field <= len(FIELDS) - 1:
-                bot.sendMessage(
-                    update.message.chat_id,
-                    text=FIELDS[current_field]['message']
-                )
+    def skip_command(self, bot, update):
+        user_id = update.message.from_user.id
+        draft = self.store.get_draft(user_id)
+
+        if draft:
+            current_field = draft['current_field']
+            field = FIELDS[current_field]
+
+            if field['required']:
+                bot.sendMessage(update.message.chat_id,
+                                text="This field is required! " + field['message'])
             else:
-                event['user_id'] = user_id
-                self.create_event(bot, update, event)
+                event = draft['event']
+                current_field += 1
+                self.update_draft(bot, event, user_id, update, current_field)
+
+    def update_draft(self, bot, event, user_id, update, current_field):
+        self.store.update_draft(user_id, event, current_field)
+
+        if current_field <= len(FIELDS) - 1:
+            bot.sendMessage(
+                update.message.chat_id,
+                text=FIELDS[current_field]['message']
+            )
+        else:
+            event['user_id'] = user_id
+            self.create_event(bot, update, event)
 
     def create_event(self, bot, update, event):
         self.store.insert_event(event)

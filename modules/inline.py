@@ -1,41 +1,59 @@
+import datetime
+
 from telegram import InlineQueryResultArticle, ParseMode, \
-    InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup
+    InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup, Emoji
 from telegram.ext import InlineQueryHandler, CallbackQueryHandler
 
 from store import TinyDBStore
 
 
+def create_event_payload(event):
+    return 'abc'
+
+
 def create_keyboard(event, user):
-    add_to_calendar_button = InlineKeyboardButton(
+    buttons = [InlineKeyboardButton(
         text="Add to calendar",
-        url='http://google.com/',
-    )
+        url='https://lukaville.github.com/create-event-bot/web/add.html#'+create_event_payload(event),
+    )]
+
+    if event.get('place'):
+        buttons.append(InlineKeyboardButton(
+            text="Map",
+            url='https://maps.google.com/?q=' + event.get('place'),
+        ))
 
     if 'users' in event and any(u['username'] == user['username'] for u in event['users']):
-        go_button = InlineKeyboardButton(
-            text="I'm not going",
+        buttons.append(InlineKeyboardButton(
+            text="Exit",
             callback_data='ngo_' + str(event.eid)
-        )
+        ))
     else:
-        go_button = InlineKeyboardButton(
-            text="I'm going",
+        buttons.append(InlineKeyboardButton(
+            text="Join",
             callback_data='go_' + str(event.eid)
-        )
+        ))
 
-    return [[add_to_calendar_button, go_button], []]
+    return [buttons, []]
+
+
+def format_date(param):
+    timestamp = int(param)
+    date = datetime.datetime.fromtimestamp(timestamp)
+    return date.strftime("%m/%d/%Y %H:%M")
 
 
 def create_event_message(event, user):
     message_text = "*{name}*\n{date}\n".format(
         name=event['name'],
-        date=event['date']
+        date=format_date(event['date'])
     )
 
     if 'description' in event:
-        message_text += '_' + event['description'] + '_\n'
+        message_text += Emoji.PAGE_WITH_CURL + ' _' + event['description'] + '_\n'
 
     if 'place' in event:
-        message_text += event['place'] + '\n'
+        message_text += Emoji.ROUND_PUSHPIN + ' ' + event['place'] + '\n'
 
     if 'users' in event and len(event['users']) > 0:
         message_text += '\nWill go: \n'
@@ -103,7 +121,7 @@ class InlineModule(object):
             keyboard = create_keyboard(event, user)
             result = InlineQueryResultArticle(id=event.eid,
                                               title=event['name'],
-                                              description=event['date'],
+                                              description=format_date(event['date']),
                                               input_message_content=InputTextMessageContent(
                                                   create_event_message(event, user),
                                                   parse_mode=ParseMode.MARKDOWN
