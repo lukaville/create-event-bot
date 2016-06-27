@@ -1,0 +1,4 @@
+telegram
+python-telegram-bot==4.2.1
+requests==2.10.0
+tinydb==3.2.0
