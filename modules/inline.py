@@ -112,6 +112,7 @@ class InlineModule(object):
             result = InlineQueryResultArticle(id=event.eid,
                                               title=event['name'],
                                               description=format_date(event['date']),
+                                              thumb_url='https://i.imgur.com/BgTaSzk.png',
                                               input_message_content=InputTextMessageContent(
                                                   create_event_message(event, user),
                                                   parse_mode=ParseMode.MARKDOWN
