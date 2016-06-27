@@ -80,6 +80,7 @@ class CommandsModule(object):
 
     def create_event(self, bot, update, event):
         self.store.insert_event(event)
+        self.store.remove_draft(update.message.from_user.id)
 
         keyboard = [[InlineKeyboardButton(text='Send event', switch_inline_query=event['name'])], []]
         bot.sendMessage(

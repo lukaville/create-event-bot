@@ -30,6 +30,9 @@ class TinyDBStore(object):
     def get_draft(self, user_id):
         return self.drafts_db.get(Query().user_id == user_id)
 
+    def remove_draft(self, user_id):
+        self.drafts_db.remove(Query().user_id == user_id)
+
     # Events
     def insert_event(self, event):
         event_id = self.events_db.insert(event)
