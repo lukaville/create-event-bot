@@ -20,7 +20,7 @@ def create_keyboard(event, user):
     buttons = [
         InlineKeyboardButton(
             text="Add to calendar",
-            url='https://lukaville.github.com/create-event-bot/web/add.html#' + create_event_payload(event)
+            url='https://lukaville.github.com/create-event-bot/static/add.html#' + create_event_payload(event)
         ),
         InlineKeyboardButton(
             text="Join",
@@ -123,7 +123,8 @@ class InlineModule(object):
             update.inline_query.id,
             results=results,
             switch_pm_text='Create new event...',
-            switch_pm_parameter='new'
+            switch_pm_parameter='new',
+            is_personal=True
         )
 
     def get_handlers(self):
