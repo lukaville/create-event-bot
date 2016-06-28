@@ -32,9 +32,15 @@ function fillCard(event) {
 
     $('#date').html(formattedDate);
 
-    // Set image
+    // Preload and set image
     var image = getImage(event);
-    $('.event').css('background-image', 'url(images/img_' + image + '.jpg)');
+    var imageUrl = 'images/img_' + image + '.jpg';
+
+    $('<img/>').attr('src', imageUrl).load(function () {
+        $(this).remove();
+        $('.event').css('background-image', 'url(' + imageUrl + ')');
+        showCard();
+    });
 }
 
 function addButtons(event) {
@@ -56,4 +62,8 @@ function addButtons(event) {
         data: data
     });
     $('.add').append(calendar);
+}
+
+function showCard() {
+    $('.page').fadeIn(200);
 }
