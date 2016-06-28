@@ -29,6 +29,12 @@ body, html {
     font-weight: 500;
 }
 
+#place {
+    border-bottom: 2px dotted white;
+    display: inline;
+    cursor: pointer;
+}
+
 .event *:first-child {
     margin-top: 0;
 }
