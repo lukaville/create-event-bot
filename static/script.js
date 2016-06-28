@@ -9,7 +9,7 @@ $(function () {
     var calendar = createCalendar({
         data: {
             title: event.name,
-            start: new Date(event.date),
+            start: new Date(parseInt(event.date) * 1000),
             duration: 60,
             address: event.place,
             description: event.description
