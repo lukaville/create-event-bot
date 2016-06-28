@@ -15,5 +15,5 @@ $(function () {
             description: event.description
         }
     });
-    $('body').append(calendar);
+    $('.add').append(calendar);
 });
