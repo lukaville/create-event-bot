@@ -6,4 +6,14 @@ $(function () {
     $('#description').html(event.description);
     $('#place').html(event.place);
     $('#date').html(event.date);
+    var calendar = createCalendar({
+        data: {
+            title: event.name,
+            start: new Date(event.date),
+            duration: 60,
+            address: event.place,
+            description: event.description
+        }
+    });
+    $('body').append(calendar);
 });
