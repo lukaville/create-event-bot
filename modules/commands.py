@@ -39,7 +39,7 @@ def parse_fields(field, value):
 
 
 def help_command(bot, update):
-    bot.sendMessage(update.message.chat_id, text='...')
+    bot.sendMessage(update.message.chat_id, text='Type in any chat: @createeventbot [event name]')
 
 
 class CommandsModule(object):
@@ -53,14 +53,10 @@ class CommandsModule(object):
         self.store = TinyDBStore()
 
     def start_command(self, bot, update, args):
-        if args:
-            if args[0] == 'new':
-                user_id = update.message.from_user.id
-                self.store.new_draft(user_id)
-                bot.sendMessage(update.message.chat_id,
-                                text="Let's create a new event. First, send me name of the event.")
-        else:
-            bot.sendMessage(update.message.chat_id, text="Hi!")
+        user_id = update.message.from_user.id
+        self.store.new_draft(user_id)
+        bot.sendMessage(update.message.chat_id,
+                        text="Let's create a new event. First, send me name of the event.")
 
     def message(self, bot, update):
         user_id = update.message.from_user.id
