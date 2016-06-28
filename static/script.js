@@ -2,11 +2,11 @@ $(function () {
     var base64 = decodeURIComponent(window.location.hash.split('#')[1]);
     var event = JSON.parse(Base64.decode(base64));
 
-    fill_card(event);
-    add_buttons(event);
+    fillCard(event);
+    addButtons(event);
 });
 
-function fill_card(event) {
+function fillCard(event) {
     $('#title').html(event.name);
     $('#description').html(event.description);
 
@@ -31,17 +31,29 @@ function fill_card(event) {
     var formattedDate = date.toLocaleDateString(navigator.language, options);
 
     $('#date').html(formattedDate);
+
+    // Set image
+    var image = getImage(event);
+    $('.event').css('background-image', 'url(images/img_' + image + '.jpg)');
 }
 
-function add_buttons(event) {
+function addButtons(event) {
+    var data = {
+        title: event.name,
+        start: new Date(parseInt(event.date) * 1000),
+        duration: 60
+    };
+
+    if (event.place) {
+        data.address = event.place;
+    }
+
+    if (event.description) {
+        data.description = event.description;
+    }
+
     var calendar = createCalendar({
-        data: {
-            title: event.name,
-            start: new Date(parseInt(event.date) * 1000),
-            duration: 60,
-            address: event.place,
-            description: event.description
-        }
+        data: data
     });
     $('.add').append(calendar);
 }

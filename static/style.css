@@ -19,7 +19,7 @@ body, html {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
 
-    background-image: url('images/img_basketball.jpg');
+    background-color: #396eec;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center right;
