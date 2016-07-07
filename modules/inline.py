@@ -58,7 +58,13 @@ def create_event_message(event, user):
     if 'users' in event and len(event['users']) > 0:
         message_text += '\nWill go: \n'
         for u in event['users']:
-            message_text += '@' + u['username'] + ' (' + u['first_name'] + ' ' + u['last_name'] + ')\n'
+            if u.get('username'):
+                message_text += '@' + u['username'] + ' '
+
+            message_text += '(' + u['first_name']
+            if u.get('last_name'):
+                message_text += ' ' + u['last_name']
+            message_text += ')\n'
 
     return message_text
 
@@ -91,7 +97,7 @@ class InlineModule(object):
         if not event.get('users'):
             event['users'] = []
 
-        if any(u['username'] == user['username'] for u in event['users']):
+        if any(u['id'] == user['id'] for u in event['users']):
             event['users'].remove(user)
         else:
             event['users'].append(user)
